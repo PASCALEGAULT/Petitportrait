@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Petit Portrait — Garderie Québec</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sage:    #7a9e8e;
+    --sage-lt: #b5cec4;
+    --cream:   #f7f3ec;
+    --sand:    #e8dfd0;
+    --clay:    #c4795a;
+    --ink:     #2c2b29;
+    --mist:    #f0ede7;
+    --white:   #fdfcfa;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 10% 0%, #d4e8df55 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 90% 100%, #e8cfc055 0%, transparent 60%);
+  }
+
+  header {
+    padding: 1.8rem 2.5rem 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    border-bottom: 1px solid var(--sand);
+    background: var(--white);
+  }
+
+  .logo-dot {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: conic-gradient(from 30deg, var(--sage) 0%, var(--clay) 50%, var(--sage-lt) 100%);
+    flex-shrink: 0;
+    box-shadow: 0 2px 12px #7a9e8e44;
+  }
+
+  header h1 { font-family: 'Fraunces', serif; font-weight: 300; font-size: 1.7rem; line-height: 1; letter-spacing: -0.02em; }
+  header h1 em { font-style: italic; color: var(--sage); }
+  .subtitle { font-size: 0.72rem; color: #aaa; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 0.25rem; }
+
+  /* Barre clé API */
+  .api-bar {
+    background: #fffdf9;
+    border-bottom: 1px solid var(--sand);
+    padding: 0.8rem 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .api-bar label { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: #999; white-space: nowrap; flex-shrink: 0; }
+
+  .api-bar input {
+    flex: 1; min-width: 200px;
+    padding: 0.5rem 0.85rem;
+    border: 1px solid var(--sand); border-radius: 8px;
+    background: var(--white);
+    font-family: monospace; font-size: 0.82rem; color: var(--ink);
+    transition: border-color 0.2s;
+  }
+
+  .api-bar input:focus { outline: none; border-color: var(--sage); }
+
+  .api-bar .api-hint { font-size: 0.7rem; color: #bbb; }
+  .api-bar .api-hint a { color: var(--sage); text-decoration: none; }
+
+  .btn-save-key {
+    background: var(--sage); color: white; border: none; border-radius: 8px;
+    padding: 0.5rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.8rem;
+    cursor: pointer; white-space: nowrap; transition: background 0.2s;
+  }
+  .btn-save-key:hover { background: #5d8b7a; }
+  .key-saved { font-size: 0.75rem; color: var(--sage); font-weight: 500; }
+
+  /* Layout */
+  main { display: grid; grid-template-columns: 400px 1fr; min-height: calc(100vh - 120px); }
+
+  .left {
+    padding: 2rem 1.8rem;
+    border-right: 1px solid var(--sand);
+    display: flex; flex-direction: column; gap: 1.5rem;
+  }
+
+  .section-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sage); margin-bottom: 0.6rem; }
+
+  .card { background: var(--white); border: 1px solid var(--sand); border-radius: 14px; padding: 1.3rem; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+
+  .field label { display: block; font-size: 0.66rem; letter-spacing: 0.06em; text-transform: uppercase; color: #999; margin-bottom: 0.28rem; }
+
+  .field input {
+    width: 100%; padding: 0.55rem 0.75rem;
+    border: 1px solid var(--sand); border-radius: 8px;
+    background: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 0.86rem; color: var(--ink);
+    transition: border-color 0.2s;
+  }
+  .field input:focus { outline: none; border-color: var(--sage); background: var(--white); }
+
+  .domaines-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; }
+
+  .domaine-chip {
+    display: flex; align-items: center; gap: 0.45rem;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--sand); border-radius: 8px; background: var(--cream);
+    cursor: pointer; font-size: 0.8rem; transition: all 0.2s; user-select: none;
+  }
+  .domaine-chip input { display: none; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; border: 2px solid var(--sand); flex-shrink: 0; transition: all 0.2s; }
+  .domaine-chip:has(input:checked) { border-color: var(--sage); background: #f0f7f4; }
+  .domaine-chip:has(input:checked) .dot { background: var(--sage); border-color: var(--sage); }
+
+  .upload-zone {
+    border: 2px dashed var(--sage-lt); border-radius: 12px; background: var(--white);
+    padding: 1.4rem; text-align: center; cursor: pointer; transition: all 0.25s; position: relative;
+  }
+  .upload-zone:hover, .upload-zone.drag-over { border-color: var(--sage); background: #f2faf7; }
+  .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-icon { font-size: 1.8rem; margin-bottom: 0.4rem; display: block; }
+  .upload-zone p { font-size: 0.82rem; color: #999; line-height: 1.5; }
+  .upload-zone strong { color: var(--sage); }
+
+  .preview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4rem; margin-top: 0.6rem; }
+  .preview-item { position: relative; aspect-ratio: 1; border-radius: 7px; overflow: hidden; border: 1px solid var(--sand); }
+  .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+  .remove-btn {
+    position: absolute; top: 3px; right: 3px; background: #00000088; color: white;
+    border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 0.6rem;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+
+  .btn-analyser {
+    background: linear-gradient(135deg, var(--sage) 0%, #5d8b7a 100%);
+    color: white; border: none; border-radius: 12px; padding: 1rem 1.5rem;
+    font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500;
+    cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+    transition: all 0.25s; box-shadow: 0 4px 16px #7a9e8e44;
+  }
+  .btn-analyser:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 24px #7a9e8e55; }
+  .btn-analyser:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .right { padding: 2rem 2.2rem; display: flex; flex-direction: column; gap: 1.2rem; }
+
+  .status {
+    display: flex; align-items: center; gap: 0.7rem;
+    padding: 0.85rem 1.1rem; border-radius: 10px;
+    background: var(--mist); border: 1px solid var(--sand);
+    font-size: 0.82rem; min-height: 42px; transition: all 0.3s;
+  }
+  .status.loading { background: #edf5f1; border-color: var(--sage-lt); }
+  .status.success { background: #edf5f1; border-color: var(--sage); }
+  .status.error   { background: #fdf0ec; border-color: #e8a090; }
+
+  .spinner { width: 15px; height: 15px; border: 2px solid var(--sage-lt); border-top-color: var(--sage); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .result-wrap { flex: 1; display: flex; flex-direction: column; gap: 0.6rem; }
+  .result-header { display: flex; align-items: center; justify-content: space-between; }
+  .word-count { font-size: 0.74rem; color: #bbb; }
+  .word-count span { color: var(--sage); font-weight: 500; }
+
+  .result-textarea {
+    flex: 1; width: 100%; min-height: 440px;
+    padding: 1.4rem; border: 1px solid var(--sand); border-radius: 14px;
+    background: var(--white); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; line-height: 1.78; color: var(--ink);
+    resize: vertical; transition: border-color 0.2s; box-shadow: inset 0 1px 4px #0000000a;
+  }
+  .result-textarea:focus { outline: none; border-color: var(--sage); }
+  .result-textarea::placeholder { color: #ccc; font-style: italic; font-family: 'Fraunces', serif; font-weight: 300; }
+
+  .action-row { display: flex; gap: 0.7rem; align-items: center; }
+
+  .btn-copy {
+    background: var(--clay); color: white; border: none; border-radius: 10px;
+    padding: 0.78rem 1.3rem; font-family: 'DM Sans', sans-serif; font-size: 0.86rem; font-weight: 500;
+    cursor: pointer; display: flex; align-items: center; gap: 0.45rem;
+    transition: all 0.2s; box-shadow: 0 3px 10px #c4795a44;
+  }
+  .btn-copy:hover:not(:disabled) { background: #b3694b; transform: translateY(-1px); }
+  .btn-copy:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-clear {
+    background: transparent; color: #bbb; border: 1px solid var(--sand); border-radius: 10px;
+    padding: 0.78rem 1.1rem; font-family: 'DM Sans', sans-serif; font-size: 0.86rem;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-clear:hover { color: var(--ink); border-color: #bbb; }
+
+  .copy-ok { font-size: 0.76rem; color: var(--sage); font-weight: 500; opacity: 0; transition: opacity 0.3s; }
+  .copy-ok.show { opacity: 1; }
+
+  @media (max-width: 860px) {
+    main { grid-template-columns: 1fr; }
+    .left { border-right: none; border-bottom: 1px solid var(--sand); }
+    .api-bar { padding: 0.8rem 1.2rem; }
+    header { padding: 1.2rem 1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-dot"></div>
+  <div>
+    <h1>Petit <em>Portrait</em></h1>
+    <p class="subtitle">Portrait périodique · Dossier éducatif · Garderie Québec</p>
+  </div>
+</header>
+
+<div class="api-bar">
+  <label>🔑 Clé API Gemini</label>
+  <input type="password" id="api-key" placeholder="AIza..." autocomplete="off" spellcheck="false">
+  <button class="btn-save-key" id="btn-save-key">Sauvegarder</button>
+  <span class="key-saved" id="key-saved"></span>
+  <span class="api-hint">Gratuit sur <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a> · Clé sauvegardée dans votre navigateur uniquement</span>
+</div>
+
+<main>
+
+  <div class="left">
+
+    <div>
+      <p class="section-label">👶 Informations</p>
+      <div class="card">
+        <div class="form-grid">
+          <div class="field"><label>Prénom de l'enfant</label><input type="text" id="prenom" placeholder="ex. Émile"></div>
+          <div class="field"><label>Âge</label><input type="text" id="age" placeholder="ex. 3 ans 4 mois"></div>
+          <div class="field"><label>Période observée</label><input type="text" id="periode" placeholder="ex. sept. – nov. 2025"></div>
+          <div class="field"><label>Éducatrice</label><input type="text" id="educatrice" placeholder="Votre prénom"></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <p class="section-label">📋 Domaines de développement</p>
+      <div class="domaines-grid">
+        <label class="domaine-chip"><input type="checkbox" class="domaine" value="physique et moteur" checked><span class="dot"></span> 🏃 Physique &amp; moteur</label>
+        <label class="domaine-chip"><input type="checkbox" class="domaine" value="cognitif" checked><span class="dot"></span> 🧠 Cognitif</label>
+        <label class="domaine-chip"><input type="checkbox" class="domaine" value="langagier" checked><span class="dot"></span> 💬 Langagier</label>
+        <label class="domaine-chip"><input type="checkbox" class="domaine" value="social et affectif" checked><span class="dot"></span> ❤️ Social &amp; affectif</label>
+      </div>
+    </div>
+
+    <div>
+      <p class="section-label">📸 Photos du cahier de notes (<span id="img-count">0</span>)</p>
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" id="file-input" accept="image/*" multiple>
+        <span class="upload-icon">📓</span>
+        <p><strong>Appuyez ici</strong> pour photographier<br>ou choisir vos pages de cahier</p>
+      </div>
+      <div class="preview-grid" id="preview-grid"></div>
+    </div>
+
+    <button class="btn-analyser" id="btn-analyser" disabled>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+      Générer le portrait périodique
+    </button>
+
+  </div>
+
+  <div class="right">
+
+    <div class="status" id="status">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity=".4"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      <span>Remplissez les informations, ajoutez les photos du cahier et cliquez sur Générer.</span>
+    </div>
+
+    <div class="result-wrap">
+      <div class="result-header">
+        <p class="section-label" style="margin:0">Portrait périodique · ~500 caractères</p>
+        <p class="word-count">Caractères : <span id="word-count">0</span></p>
+      </div>
+      <textarea class="result-textarea" id="result-text" placeholder="Le portrait périodique apparaîtra ici…" readonly></textarea>
+      <div class="action-row">
+        <button class="btn-copy" id="btn-copy" disabled>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copier le texte
+        </button>
+        <button class="btn-clear" id="btn-clear">Effacer</button>
+        <span class="copy-ok" id="copy-ok">✓ Copié !</span>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+/* ── Clé API Gemini ── */
+const apiKeyInput = document.getElementById('api-key');
+const keySavedEl  = document.getElementById('key-saved');
+const saved = localStorage.getItem('gemini_api_key');
+if (saved) { apiKeyInput.value = saved; keySavedEl.textContent = '✓ Clé chargée'; }
+
+document.getElementById('btn-save-key').addEventListener('click', () => {
+  const k = apiKeyInput.value.trim();
+  if (!k) { keySavedEl.textContent = '⚠ Entrez une clé'; return; }
+  localStorage.setItem('gemini_api_key', k);
+  keySavedEl.textContent = '✓ Sauvegardée !';
+  setTimeout(() => keySavedEl.textContent = '✓ Clé chargée', 2500);
+});
+
+/* ── Upload photos ── */
+const images = [];
+const fileInput   = document.getElementById('file-input');
+const previewGrid = document.getElementById('preview-grid');
+const imgCountEl  = document.getElementById('img-count');
+const uploadZone  = document.getElementById('upload-zone');
+
+fileInput.addEventListener('change', handleFiles);
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('drag-over'); handleFiles({ target: { files: e.dataTransfer.files } }); });
+
+async function handleFiles(e) {
+  for (const file of Array.from(e.target.files)) {
+    if (!file.type.startsWith('image/')) continue;
+    const { dataUrl, base64 } = await toBase64(file);
+    images.push({ dataUrl, base64, mediaType: file.type });
+  }
+  renderPreviews();
+}
+
+function toBase64(file) {
+  return new Promise(res => {
+    const r = new FileReader();
+    r.onload = () => res({ dataUrl: r.result, base64: r.result.split(',')[1] });
+    r.readAsDataURL(file);
+  });
+}
+
+function renderPreviews() {
+  previewGrid.innerHTML = '';
+  images.forEach((img, i) => {
+    const div = document.createElement('div');
+    div.className = 'preview-item';
+    div.innerHTML = `<img src="${img.dataUrl}"><button class="remove-btn">✕</button>`;
+    div.querySelector('.remove-btn').addEventListener('click', () => { images.splice(i, 1); renderPreviews(); });
+    previewGrid.appendChild(div);
+  });
+  imgCountEl.textContent = images.length;
+  document.getElementById('btn-analyser').disabled = images.length === 0;
+}
+
+/* ── Analyse Gemini ── */
+document.getElementById('btn-analyser').addEventListener('click', async () => {
+  const apiKey = apiKeyInput.value.trim();
+  if (!apiKey) { setStatus('error', 'Entrez votre clé API Gemini (gratuite sur aistudio.google.com).'); return; }
+  if (!images.length) return;
+
+  const prenom     = document.getElementById('prenom').value.trim() || "l'enfant";
+  const age        = document.getElementById('age').value.trim();
+  const periode    = document.getElementById('periode').value.trim();
+  const educatrice = document.getElementById('educatrice').value.trim();
+  const domaines   = Array.from(document.querySelectorAll('.domaine:checked')).map(c => c.value);
+
+  setStatus('loading', 'Lecture des notes et rédaction du portrait en cours…');
+  document.getElementById('btn-analyser').disabled = true;
+  document.getElementById('result-text').value = '';
+  document.getElementById('word-count').textContent = '0';
+  document.getElementById('btn-copy').disabled = true;
+
+  const parts = [];
+  images.forEach((img, i) => {
+    parts.push({ inline_data: { mime_type: img.mediaType, data: img.base64 } });
+    parts.push({ text: `Page ${i + 1} du cahier de notes.` });
+  });
+
+  const infoEnfant = [
+    `Prénom : ${prenom}`,
+    age ? `Âge : ${age}` : '',
+    periode ? `Période : ${periode}` : '',
+    educatrice ? `Éducatrice : ${educatrice}` : '',
+  ].filter(Boolean).join('\n');
+
+  parts.push({ text: `Tu es une éducatrice qualifiée en services de garde éducatifs au Québec. Rédige le portrait périodique de développement d'un enfant, tel qu'exigé par le dossier éducatif du Ministère de la Famille du Québec (obligatoire depuis 2021).
+
+INFORMATIONS :
+${infoEnfant}
+
+INSTRUCTIONS :
+- Texte continu de 480 à 520 caractères. Aucune liste à puces.
+- Langage professionnel, bienveillant et positif, comme dans les CPE québécois.
+- Présente brièvement l'enfant et la période en introduction.
+- Couvre obligatoirement : ${domaines.join(', ')}.
+- Pour chaque domaine : comportements observés, forces, progrès, et si pertinent défis ou axes de soutien.
+- Termine par une synthèse des échanges avec les parents et des pistes d'action.
+- Commence directement le texte, sans titre ni en-tête.
+- Utilise le prénom tout au long du texte.
+- Français québécois professionnel uniquement.
+- Base-toi exclusivement sur les photos du cahier de notes ci-jointes.` });
+
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts }],
+        generationConfig: { temperature: 0.7, maxOutputTokens: 1200 }
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `Erreur HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const texte = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    if (!texte) throw new Error('Réponse vide. Vérifiez votre clé API.');
+
+    const ta = document.getElementById('result-text');
+    ta.value = texte;
+    ta.removeAttribute('readonly');
+    const wc = texte.length;
+    document.getElementById('word-count').textContent = wc;
+    document.getElementById('btn-copy').disabled = false;
+    setStatus('success', `✓ Portrait généré · ${wc} caractères · Vous pouvez modifier le texte avant de le copier.`);
+  } catch (err) {
+    setStatus('error', `Erreur : ${err.message}`);
+  } finally {
+    document.getElementById('btn-analyser').disabled = images.length === 0;
+  }
+});
+
+/* ── Copier ── */
+document.getElementById('btn-copy').addEventListener('click', async () => {
+  const text = document.getElementById('result-text').value;
+  if (!text) return;
+  try { await navigator.clipboard.writeText(text); }
+  catch { const ta = document.getElementById('result-text'); ta.select(); document.execCommand('copy'); }
+  const el = document.getElementById('copy-ok');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+});
+
+/* ── Effacer ── */
+document.getElementById('btn-clear').addEventListener('click', () => {
+  const ta = document.getElementById('result-text');
+  ta.value = ''; ta.setAttribute('readonly', '');
+  document.getElementById('word-count').textContent = '0';
+  document.getElementById('btn-copy').disabled = true;
+  setStatus('idle', 'Remplissez les informations, ajoutez les photos du cahier et cliquez sur Générer.');
+});
+
+/* ── Compteur mots ── */
+document.getElementById('result-text').addEventListener('input', () => {
+  document.getElementById('word-count').textContent =
+    document.getElementById('result-text').value.length;
+});
+
+/* ── Status ── */
+function setStatus(type, msg) {
+  const el = document.getElementById('status');
+  el.className = 'status ' + (type === 'idle' ? '' : type);
+  if (type === 'loading') {
+    el.innerHTML = `<div class="spinner"></div><span>${msg}</span>`;
+  } else if (type === 'success') {
+    el.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7a9e8e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span style="color:#5a8a6a">${msg}</span>`;
+  } else if (type === 'error') {
+    el.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4795a" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg><span style="color:#b06848">${msg}</span>`;
+  } else {
+    el.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity=".4"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg><span>${msg}</span>`;
+  }
+}
+</script>
+</body>
+</html>
