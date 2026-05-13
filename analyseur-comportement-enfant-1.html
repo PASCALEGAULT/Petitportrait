@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Petit Portrait — Analyse de développement</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sage:    #7a9e8e;
+    --sage-lt: #b5cec4;
+    --cream:   #f7f3ec;
+    --sand:    #e8dfd0;
+    --clay:    #c4795a;
+    --ink:     #2c2b29;
+    --mist:    #f0ede7;
+    --white:   #fdfcfa;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 10% 0%, #d4e8df55 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 90% 100%, #e8cfc055 0%, transparent 60%);
+  }
+
+  /* ── Header ── */
+  header {
+    padding: 2.5rem 3rem 2rem;
+    display: flex;
+    align-items: flex-end;
+    gap: 1.2rem;
+    border-bottom: 1px solid var(--sand);
+  }
+
+  .logo-dot {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: conic-gradient(from 30deg, var(--sage) 0%, var(--clay) 50%, var(--sage-lt) 100%);
+    flex-shrink: 0;
+    box-shadow: 0 2px 12px #7a9e8e44;
+  }
+
+  header h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 1.85rem;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  header h1 em { font-style: italic; color: var(--sage); }
+
+  header p {
+    font-size: 0.78rem;
+    color: #888;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-left: auto;
+    align-self: center;
+  }
+
+  /* ── Main layout ── */
+  main {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 100px);
+  }
+
+  /* ── Left panel ── */
+  .left-panel {
+    padding: 2.5rem 2rem;
+    border-right: 1px solid var(--sand);
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sage);
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── Info enfant ── */
+  .info-card {
+    background: var(--white);
+    border: 1px solid var(--sand);
+    border-radius: 14px;
+    padding: 1.4rem;
+  }
+
+  .info-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .info-row:last-child { margin-bottom: 0; }
+
+  .field label {
+    display: block;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 0.3rem;
+  }
+
+  .field input, .field select {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--sand);
+    border-radius: 8px;
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    color: var(--ink);
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: var(--sage);
+    background: var(--white);
+  }
+
+  /* ── Upload zone ── */
+  .upload-zone {
+    border: 2px dashed var(--sage-lt);
+    border-radius: 14px;
+    background: var(--white);
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+  }
+
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--sage);
+    background: #f0f7f4;
+  }
+
+  .upload-zone input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+
+  .upload-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .upload-zone p { font-size: 0.85rem; color: #888; }
+  .upload-zone strong { color: var(--sage); }
+
+  /* ── Preview images ── */
+  .preview-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .preview-item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--sand);
+  }
+
+  .preview-item img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+
+  .preview-item .remove-btn {
+    position: absolute; top: 4px; right: 4px;
+    background: #00000099;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px; height: 20px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .preview-count {
+    font-size: 0.78rem;
+    color: var(--sage);
+    font-weight: 500;
+    margin-top: 0.5rem;
+    text-align: center;
+  }
+
+  /* ── Domaines checkboxes ── */
+  .domaines-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .domaine-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--sand);
+    border-radius: 8px;
+    background: var(--white);
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .domaine-chip input { display: none; }
+
+  .domaine-chip .chip-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    border: 2px solid var(--sand);
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .domaine-chip:has(input:checked) {
+    border-color: var(--sage);
+    background: #f0f7f4;
+  }
+
+  .domaine-chip:has(input:checked) .chip-dot {
+    background: var(--sage);
+    border-color: var(--sage);
+  }
+
+  /* ── Analyse button ── */
+  .btn-analyser {
+    background: linear-gradient(135deg, var(--sage) 0%, #5d8b7a 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    transition: all 0.25s;
+    box-shadow: 0 4px 16px #7a9e8e44;
+    width: 100%;
+  }
+
+  .btn-analyser:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px #7a9e8e55;
+  }
+
+  .btn-analyser:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ── Right panel ── */
+  .right-panel {
+    padding: 2.5rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+  }
+
+  /* ── Status strip ── */
+  .status-strip {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.9rem 1.2rem;
+    border-radius: 10px;
+    background: var(--mist);
+    border: 1px solid var(--sand);
+    font-size: 0.82rem;
+    min-height: 44px;
+    transition: all 0.3s;
+  }
+
+  .status-strip.loading {
+    background: #edf5f1;
+    border-color: var(--sage-lt);
+  }
+
+  .status-strip.success {
+    background: #edf5f1;
+    border-color: var(--sage);
+  }
+
+  .status-strip.error {
+    background: #fdf0ec;
+    border-color: #e8a090;
+  }
+
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid var(--sage-lt);
+    border-top-color: var(--sage);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Result box ── */
+  .result-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .word-count {
+    font-size: 0.75rem;
+    color: #aaa;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .word-count span {
+    color: var(--sage);
+    font-weight: 500;
+  }
+
+  .result-textarea {
+    flex: 1;
+    width: 100%;
+    min-height: 460px;
+    padding: 1.5rem;
+    border: 1px solid var(--sand);
+    border-radius: 14px;
+    background: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.75;
+    color: var(--ink);
+    resize: vertical;
+    transition: border-color 0.2s;
+    box-shadow: inset 0 1px 4px #0000000a;
+  }
+
+  .result-textarea:focus {
+    outline: none;
+    border-color: var(--sage);
+  }
+
+  .result-textarea::placeholder {
+    color: #bbb;
+    font-style: italic;
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+  }
+
+  /* ── Action buttons ── */
+  .action-row {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .btn-copy {
+    background: var(--clay);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.8rem 1.4rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+    box-shadow: 0 3px 12px #c4795a44;
+  }
+
+  .btn-copy:hover:not(:disabled) {
+    background: #b3694b;
+    transform: translateY(-1px);
+  }
+
+  .btn-copy:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-clear {
+    background: transparent;
+    color: #aaa;
+    border: 1px solid var(--sand);
+    border-radius: 10px;
+    padding: 0.8rem 1.2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-clear:hover { color: var(--ink); border-color: #aaa; }
+
+  .copy-confirm {
+    font-size: 0.78rem;
+    color: var(--sage);
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.3s;
+    align-self: center;
+  }
+
+  .copy-confirm.visible { opacity: 1; }
+
+  /* ── Domaines section footer note ── */
+  .hint {
+    font-size: 0.72rem;
+    color: #bbb;
+    font-style: italic;
+    margin-top: -0.5rem;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+    .left-panel { border-right: none; border-bottom: 1px solid var(--sand); }
+    header { padding: 1.5rem; flex-wrap: wrap; }
+    header p { width: 100%; margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-dot"></div>
+  <h1>Petit <em>Portrait</em></h1>
+  <p>Outil d'analyse de développement · Garderie Québec</p>
+</header>
+
+<main>
+
+  <!-- ═══ PANNEAU GAUCHE ═══ -->
+  <div class="left-panel">
+
+    <!-- Infos enfant -->
+    <div>
+      <p class="section-label">Informations</p>
+      <div class="info-card">
+        <div class="info-row">
+          <div class="field">
+            <label>Prénom de l'enfant</label>
+            <input type="text" id="prenom" placeholder="ex. Émile">
+          </div>
+          <div class="field">
+            <label>Âge</label>
+            <input type="text" id="age" placeholder="ex. 3 ans 4 mois">
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="field">
+            <label>Période observée</label>
+            <input type="text" id="periode" placeholder="ex. sept. – nov. 2025">
+          </div>
+          <div class="field">
+            <label>Éducatrice</label>
+            <input type="text" id="educatrice" placeholder="Votre prénom">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Domaines de développement -->
+    <div>
+      <p class="section-label">Domaines à couvrir</p>
+      <div class="domaines-grid">
+        <label class="domaine-chip">
+          <input type="checkbox" class="domaine" value="physique et moteur" checked>
+          <span class="chip-dot"></span> 🏃 Physique & moteur
+        </label>
+        <label class="domaine-chip">
+          <input type="checkbox" class="domaine" value="cognitif" checked>
+          <span class="chip-dot"></span> 🧠 Cognitif
+        </label>
+        <label class="domaine-chip">
+          <input type="checkbox" class="domaine" value="langagier" checked>
+          <span class="chip-dot"></span> 💬 Langagier
+        </label>
+        <label class="domaine-chip">
+          <input type="checkbox" class="domaine" value="social et affectif" checked>
+          <span class="chip-dot"></span> ❤️ Social & affectif
+        </label>
+      </div>
+      <p class="hint">Conforme au dossier éducatif du Ministère de la Famille (Qc)</p>
+    </div>
+
+    <!-- Upload photos -->
+    <div>
+      <p class="section-label">Photos des notes (<span id="img-count">0</span> ajoutée(s))</p>
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" id="file-input" accept="image/*" multiple>
+        <span class="upload-icon">📸</span>
+        <p><strong>Glisser ou cliquer</strong> pour ajouter des photos<br>de vos notes manuscrites</p>
+      </div>
+      <div class="preview-grid" id="preview-grid"></div>
+    </div>
+
+    <button class="btn-analyser" id="btn-analyser" disabled>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+      Analyser les comportements
+    </button>
+
+  </div>
+
+  <!-- ═══ PANNEAU DROIT ═══ -->
+  <div class="right-panel">
+
+    <div class="status-strip" id="status-strip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity=".5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      <span id="status-msg">Ajoutez des photos de notes et lancez l'analyse pour générer le portrait périodique.</span>
+    </div>
+
+    <div class="result-container">
+      <div class="result-header">
+        <p class="section-label" style="margin:0">Portrait périodique · ~500 mots</p>
+        <p class="word-count">Mots : <span id="word-count">0</span></p>
+      </div>
+
+      <textarea
+        class="result-textarea"
+        id="result-text"
+        placeholder="Le texte d'analyse apparaîtra ici une fois l'analyse complétée…"
+        readonly
+      ></textarea>
+
+      <div class="action-row">
+        <button class="btn-copy" id="btn-copy" disabled>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copier le texte
+        </button>
+        <button class="btn-clear" id="btn-clear">Effacer</button>
+        <span class="copy-confirm" id="copy-confirm">✓ Copié dans le presse-papiers !</span>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+/* ─── État de l'application ─── */
+const state = {
+  images: [],   // { file, dataUrl, base64 }
+};
+
+/* ─── Éléments DOM ─── */
+const fileInput     = document.getElementById('file-input');
+const previewGrid   = document.getElementById('preview-grid');
+const imgCount      = document.getElementById('img-count');
+const btnAnalyser   = document.getElementById('btn-analyser');
+const btnCopy       = document.getElementById('btn-copy');
+const btnClear      = document.getElementById('btn-clear');
+const resultText    = document.getElementById('result-text');
+const wordCountEl   = document.getElementById('word-count');
+const statusStrip   = document.getElementById('status-strip');
+const statusMsg     = document.getElementById('status-msg');
+const copyConfirm   = document.getElementById('copy-confirm');
+
+/* ─── Upload ─── */
+fileInput.addEventListener('change', handleFiles);
+
+const uploadZone = document.getElementById('upload-zone');
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  handleFiles({ target: { files: e.dataTransfer.files } });
+});
+
+async function handleFiles(e) {
+  const files = Array.from(e.target.files);
+  for (const file of files) {
+    if (!file.type.startsWith('image/')) continue;
+    const { dataUrl, base64 } = await readFileAsBase64(file);
+    state.images.push({ file, dataUrl, base64, mediaType: file.type });
+  }
+  renderPreviews();
+  updateUI();
+}
+
+function readFileAsBase64(file) {
+  return new Promise(res => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      const base64 = dataUrl.split(',')[1];
+      res({ dataUrl, base64 });
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderPreviews() {
+  previewGrid.innerHTML = '';
+  state.images.forEach((img, i) => {
+    const div = document.createElement('div');
+    div.className = 'preview-item';
+    div.innerHTML = `
+      <img src="${img.dataUrl}" alt="Note ${i+1}">
+      <button class="remove-btn" data-idx="${i}">✕</button>
+    `;
+    div.querySelector('.remove-btn').addEventListener('click', () => {
+      state.images.splice(i, 1);
+      renderPreviews();
+      updateUI();
+    });
+    previewGrid.appendChild(div);
+  });
+  imgCount.textContent = state.images.length;
+}
+
+function updateUI() {
+  btnAnalyser.disabled = state.images.length === 0;
+}
+
+/* ─── Analyse IA ─── */
+btnAnalyser.addEventListener('click', analyser);
+
+async function analyser() {
+  const prenom     = document.getElementById('prenom').value.trim() || 'l\'enfant';
+  const age        = document.getElementById('age').value.trim() || '';
+  const periode    = document.getElementById('periode').value.trim() || '';
+  const educatrice = document.getElementById('educatrice').value.trim() || '';
+  const domaines   = Array.from(document.querySelectorAll('.domaine:checked')).map(c => c.value);
+
+  if (state.images.length === 0) return;
+
+  setStatus('loading', 'Analyse des notes en cours… Cela peut prendre quelques secondes.');
+  btnAnalyser.disabled = true;
+  resultText.value = '';
+  wordCountEl.textContent = '0';
+  btnCopy.disabled = true;
+
+  // Construire le message multi-image pour Claude
+  const contentParts = [];
+
+  // Ajouter chaque image
+  state.images.forEach((img, i) => {
+    contentParts.push({
+      type: 'image',
+      source: {
+        type: 'base64',
+        media_type: img.mediaType || 'image/jpeg',
+        data: img.base64
+      }
+    });
+    contentParts.push({
+      type: 'text',
+      text: `Photo ${i + 1} de notes d'observation de l'éducatrice.`
+    });
+  });
+
+  const domainesStr = domaines.length > 0
+    ? `Tu dois obligatoirement couvrir les domaines suivants : ${domaines.join(', ')}.`
+    : '';
+
+  const infoEnfant = [
+    prenom !== 'l\'enfant' ? `Prénom de l'enfant : ${prenom}` : '',
+    age ? `Âge : ${age}` : '',
+    periode ? `Période observée : ${periode}` : '',
+    educatrice ? `Éducatrice : ${educatrice}` : ''
+  ].filter(Boolean).join('\n');
+
+  contentParts.push({
+    type: 'text',
+    text: `
+Tu es une éducatrice qualifiée en services de garde éducatifs au Québec. Tu rédiges le portrait périodique de développement d'un enfant, conformément au dossier éducatif exigé par le Ministère de la Famille du Québec (obligation en vigueur depuis 2021).
+
+INFORMATIONS :
+${infoEnfant || 'Non précisées.'}
+
+INSTRUCTIONS DE RÉDACTION :
+- Rédigis un texte continu de 480 à 520 mots (pas de listes à puces).
+- Utilise un langage professionnel, bienveillant et positif, tel que pratiqué dans les CPE et garderies québécoises.
+- Commence par présenter brièvement l'enfant et la période d'observation.
+- ${domainesStr}
+- Pour chaque domaine, décris les comportements observés, les forces, les progrès, et si pertinent, les défis ou axes de soutien.
+- Termine par une synthèse des échanges avec les parents et des pistes d'action à privilégier.
+- Commence directement le texte sans titre ni en-tête.
+- Utilise le prénom de l'enfant tout au long du texte.
+- Le texte doit être rédigé entièrement en français québécois professionnel.
+- Base-toi uniquement sur les observations visibles dans les photos de notes fournies. Si une information n'est pas lisible, exprime-toi de façon générale et professionnelle.
+`
+  });
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: contentParts }]
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    const texte = data.content?.find(b => b.type === 'text')?.text || '';
+
+    if (!texte) throw new Error('Réponse vide du modèle.');
+
+    resultText.value = texte;
+    resultText.removeAttribute('readonly');
+    const wc = texte.trim().split(/\s+/).filter(Boolean).length;
+    wordCountEl.textContent = wc;
+    btnCopy.disabled = false;
+    setStatus('success', `✓ Portrait généré avec succès · ${wc} mots · Vous pouvez modifier le texte avant de le copier.`);
+  } catch (err) {
+    console.error(err);
+    setStatus('error', `Erreur lors de l'analyse : ${err.message}`);
+  } finally {
+    btnAnalyser.disabled = false;
+  }
+}
+
+/* ─── Copier ─── */
+btnCopy.addEventListener('click', async () => {
+  const text = resultText.value;
+  if (!text) return;
+  try {
+    await navigator.clipboard.writeText(text);
+    copyConfirm.classList.add('visible');
+    setTimeout(() => copyConfirm.classList.remove('visible'), 3000);
+  } catch {
+    resultText.select();
+    document.execCommand('copy');
+  }
+});
+
+/* ─── Effacer ─── */
+btnClear.addEventListener('click', () => {
+  resultText.value = '';
+  resultText.setAttribute('readonly', '');
+  wordCountEl.textContent = '0';
+  btnCopy.disabled = true;
+  setStatus('idle', 'Ajoutez des photos de notes et lancez l\'analyse pour générer le portrait périodique.');
+});
+
+/* ─── Compteur de mots en temps réel ─── */
+resultText.addEventListener('input', () => {
+  const wc = resultText.value.trim().split(/\s+/).filter(Boolean).length;
+  wordCountEl.textContent = wc;
+});
+
+/* ─── Status helper ─── */
+function setStatus(type, msg) {
+  statusStrip.className = 'status-strip ' + (type === 'idle' ? '' : type);
+  if (type === 'loading') {
+    statusStrip.innerHTML = `<div class="spinner"></div><span>${msg}</span>`;
+  } else if (type === 'success') {
+    statusStrip.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7a9e8e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span style="color:#5a8a6a">${msg}</span>`;
+  } else if (type === 'error') {
+    statusStrip.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4795a" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg><span style="color:#b06848">${msg}</span>`;
+  } else {
+    statusStrip.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity=".5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg><span id="status-msg">${msg}</span>`;
+  }
+}
+</script>
+</body>
+</html>
